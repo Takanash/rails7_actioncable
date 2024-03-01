@@ -1,6 +1,7 @@
 import consumer from "channels/consumer"
 
-consumer.subscriptions.create("RoomChannel", {
+// appRoomという定数に格納
+const appRoom = consumer.subscriptions.create("RoomChannel", {
   connected() {
     // Called when the subscription is ready for use on the server
   },
@@ -11,9 +12,20 @@ consumer.subscriptions.create("RoomChannel", {
 
   received(data) {
     // Called when there's incoming data on the websocket for this channel
+    const messages = document.getElementById('messages');
+    messages.insertAdjacentHTML('beforeend', data['message']);
   },
 
-  speak: function() {
-    return this.perform('speak');
+  speak: function(message) {
+    // return this.perform('speak');
+    return this.perform('speak', {message: message});
   }
 });
+
+window.document.onkeydown = function(event) {
+  if(event.key == 'Enter') {
+    appRoom.speak(event.target.value);
+    event.target.value = '';
+    event.preventDefault();
+  }
+}
