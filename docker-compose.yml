@@ -3,6 +3,7 @@ services:
   db:
     restart: always
     image: mysql:8.0
+    platform: linux/amd64
     volumes:
       - mysql-db:/var/lib/mysql
     environment:
@@ -10,6 +11,11 @@ services:
       MYSQL_DATABASE: root
     ports:
       - 3306:3306
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -uroot -ppassword | grep 'mysqld is alive'"]
+      interval: 15s
+      timeout: 5s
+      retries: 6
   app:
     restart: always
     build: .
@@ -20,7 +26,8 @@ services:
     ports:
       - 3000:3000
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 volumes:
   mysql-db:
   bundle:
